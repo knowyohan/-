@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>열공 스터디 타이머</title>
+  
+  <!-- 📌 앱 이름 설정 -->
+  <title>먼작귀랑 대학가기</title>
+  <meta name="apple-mobile-web-app-title" content="먼작귀랑 대학가기">
+  <meta name="application-name" content="먼작귀랑 대학가기">
+
+  <!-- 📌 아이콘 연결 (github에 올린 icon.png 사용) -->
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,7 +43,6 @@
 
     h2 { font-size: 1.5rem; margin-bottom: 1.2rem; }
 
-    /* 과목 선택 및 추가 영역 */
     .subject-section {
       display: flex;
       gap: 8px;
@@ -61,7 +69,6 @@
     }
     .btn-add:hover { background: #6b7280; }
 
-    /* 타이머 디스플레이 */
     .timer {
       font-size: 3.2rem;
       font-weight: 700;
@@ -99,7 +106,6 @@
     button#resetBtn { background: #6b7280; }
     button#resetBtn:hover { background: #4b5563; }
 
-    /* 오늘 공부 기록 영역 */
     .stats-card {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 16px;
@@ -145,54 +151,39 @@
 <body>
 
   <div class="timer-card">
-    <h2>🔥 열공 스톱워치</h2>
+    <h2>🔥 먼작귀랑 대학가기</h2>
 
-    <!-- 과목 선택 및 추가 -->
     <div class="subject-section">
       <select id="subjectSelect"></select>
       <button class="btn-add" id="addSubjectBtn">+ 과목 추가</button>
     </div>
 
-    <!-- 타이머 표시 -->
     <div class="timer" id="timer">00:00:00</div>
     
-    <!-- 조작 버튼 -->
     <div class="btn-group">
       <button id="startBtn">시작</button>
       <button id="pauseBtn">일시정지</button>
       <button id="resetBtn">초기화</button>
     </div>
 
-    <!-- 오늘 과목별 기록 요약 -->
     <div class="stats-card">
       <div class="stats-header">
         <span>📅 오늘 총 공부</span>
         <span id="totalTodayTime">00:00:00</span>
       </div>
-      <ul class="stats-list" id="statsList">
-        <!-- 과목별 시간 목록이 생성됨 -->
-      </ul>
+      <ul class="stats-list" id="statsList"></ul>
     </div>
 
-    <!-- 배경사진 업로드 -->
     <label for="bgInput" class="file-label">🖼️ 배경 사진 선택</label>
     <input type="file" id="bgInput" accept="image/*">
   </div>
 
   <script>
-    // ----------------------------------------------------
-    // 1. 상태 및 데이터 초기화
-    // ----------------------------------------------------
     let timerId = null;
 
-    // 과목 목록 (기본값)
     let subjects = JSON.parse(localStorage.getItem('studySubjects')) || ['국어', '수학', '영어'];
-    
-    // 일간 공부 기록 데이터 구조:
-    // { "2026-09-18": { "국어": 3600, "수학": 1800 } }
     let studyData = JSON.parse(localStorage.getItem('studyData')) || {};
 
-    // 오늘 날짜 문자열 반환 (YYYY-MM-DD)
     function getTodayKey() {
       const today = new Date();
       const year = today.getFullYear();
@@ -206,9 +197,6 @@
       studyData[todayKey] = {};
     }
 
-    // ----------------------------------------------------
-    // 2. DOM 요소 가져오기
-    // ----------------------------------------------------
     const timerDisplay = document.getElementById('timer');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -219,10 +207,6 @@
     const statsList = document.getElementById('statsList');
     const totalTodayTimeDisplay = document.getElementById('totalTodayTime');
 
-    // ----------------------------------------------------
-    // 3. 헬퍼 및 렌더링 함수
-    // ----------------------------------------------------
-    // 초 -> HH:MM:SS 변환
     function formatTime(totalSec) {
       const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
       const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
@@ -230,7 +214,6 @@
       return `${hrs}:${mins}:${secs}`;
     }
 
-    // 과목 드롭다운 업데이트
     function renderSubjects() {
       subjectSelect.innerHTML = '';
       subjects.forEach(sub => {
@@ -241,14 +224,12 @@
       });
     }
 
-    // 선택된 과목의 오늘 공부 시간을 타이머 화면에 표시
     function updateTimerDisplay() {
       const currentSubject = subjectSelect.value;
       const currentSec = studyData[todayKey][currentSubject] || 0;
       timerDisplay.textContent = formatTime(currentSec);
     }
 
-    // 통계 및 기록 화면 갱신
     function updateStatsDisplay() {
       statsList.innerHTML = '';
       let grandTotal = 0;
@@ -265,16 +246,11 @@
       totalTodayTimeDisplay.textContent = formatTime(grandTotal);
     }
 
-    // 데이터 localStorage에 보관
     function saveData() {
       localStorage.setItem('studySubjects', JSON.stringify(subjects));
       localStorage.setItem('studyData', JSON.stringify(studyData));
     }
 
-    // ----------------------------------------------------
-    // 4. 타이머 동작 및 이벤트 처리
-    // ----------------------------------------------------
-    // 타이머 시작
     startBtn.addEventListener('click', () => {
       if (timerId) return;
 
@@ -296,13 +272,11 @@
       }, 1000);
     });
 
-    // 일시정지
     pauseBtn.addEventListener('click', () => {
       clearInterval(timerId);
       timerId = null;
     });
 
-    // 선택 과목의 오늘 시간 초기화
     resetBtn.addEventListener('click', () => {
       const currentSubject = subjectSelect.value;
       if (confirm(`'${currentSubject}' 과목의 오늘 측정 시간을 초기화하시겠습니까?`)) {
@@ -315,14 +289,12 @@
       }
     });
 
-    // 과목 변경 시 타이머 일시정지 및 화면 갱신
     subjectSelect.addEventListener('change', () => {
       clearInterval(timerId);
       timerId = null;
       updateTimerDisplay();
     });
 
-    // 새 과목 추가
     addSubjectBtn.addEventListener('click', () => {
       const newSubject = prompt('추가할 과목 이름을 입력하세요:');
       if (newSubject && newSubject.trim() !== '') {
@@ -340,7 +312,6 @@
       }
     });
 
-    // 배경화면 업로드 및 불러오기
     bgInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -358,9 +329,6 @@
       }
     });
 
-    // ----------------------------------------------------
-    // 5. 페이지 초기화 실행
-    // ----------------------------------------------------
     const savedBg = localStorage.getItem('customBg');
     if (savedBg) {
       document.body.style.backgroundImage = `url(${savedBg})`;
